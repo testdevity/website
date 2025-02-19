@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Edit3, Zap, MessageSquare, CreditCard, X } from "lucide-react";
+import { Edit3, Zap, MessageSquare, CreditCard, X, Copy, RefreshCw } from "lucide-react";
 
 /*********************************
  * 1) Minimal placeholders for Card, CardContent, Button
@@ -96,9 +96,14 @@ export default function ManipulatorAiLandingPage() {
     }
   };
 
-  /*********************************
-   * 5) JSX Output (full version with all sections!)
-   *********************************/
+  // 5) Copy to Clipboard
+  const handleCopyGeneratedText = () => {
+    if (!generatedText) return;
+    navigator.clipboard.writeText(generatedText);
+    alert("Copied to clipboard!");
+  };
+
+  // 6) JSX Output (full version with all sections!)
   return (
     <div className="min-h-screen w-full bg-black text-gray-100 font-sans relative">
       {/* Prompt Page Modal */}
@@ -145,7 +150,7 @@ export default function ManipulatorAiLandingPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2 text-gray-200 font-semibold">Message Details</label>
+              <label className="block mb-2 text-gray-200 font-semibold">Message</label>
               <textarea
                 className="w-full p-2 rounded-md bg-[#2c2c2c] text-gray-100 focus:outline-none"
                 rows={4}
@@ -202,9 +207,27 @@ export default function ManipulatorAiLandingPage() {
                 transition={{ duration: 0.5 }}
                 className="mt-6 bg-[#0a0a0a] p-4 rounded-xl text-gray-200"
               >
-                <h3 className="text-xl font-semibold text-white mb-2">Your Manipulative Message 😈</h3>
-                <div className="max-w-xs self-end px-4 py-2 rounded-2xl bg-blue-600">
-                  <p>{generatedText}</p>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-xl font-semibold text-white">Your Manipulative Message 😈</h3>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleCopyGeneratedText}
+                      className="text-gray-300 hover:text-white p-1"
+                      title="Copy"
+                    >
+                      <Copy size={20} />
+                    </button>
+                    <button
+                      onClick={handleGenerate}
+                      className="text-gray-300 hover:text-white p-1"
+                      title="Regenerate"
+                    >
+                      <RefreshCw size={20} />
+                    </button>
+                  </div>
+                </div>
+                <div className="max-w-full sm:max-w-md self-end px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-600 to-pink-600 text-white">
+                  <p className="break-words">{generatedText}</p>
                 </div>
               </motion.div>
             )}

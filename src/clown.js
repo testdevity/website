@@ -1,6 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Edit3, Zap, MessageSquare, CreditCard, X, Copy, RefreshCw } from "lucide-react";
+
+// Simple cookie helpers
+function setCookie(name, value, days = 30) {
+  const d = new Date();
+  d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = "expires=" + d.toUTCString();
+  document.cookie = `${name}=${value};${expires};path=/`;
+}
+
+function getCookie(name) {
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split("; ");
+  for (let i = 0; i < ca.length; i++) {
+    const c = ca[i];
+    if (c.indexOf(name + "=") === 0) {
+      return c.substring(name.length + 1, c.length);
+    }
+  }
+  return "";
+}
 
 /*********************************
  * 1) Minimal placeholders for Card, CardContent, Button
@@ -34,6 +54,27 @@ export default function ManipulatorAiLandingPage() {
   const [pastImages, setPastImages] = useState([]);
   const [details, setDetails] = useState("");
 
+  // Credits state:
+  // - Load from cookie (if available)
+  // - If not, default to 10
+  const [credits, setCredits] = useState(10);
+
+  // On mount, try to read the cookie for credits
+  useEffect(() => {
+    const cookieCredits = getCookie("credits");
+    if (cookieCredits) {
+      const parsed = parseInt(cookieCredits, 10);
+      if (!isNaN(parsed)) {
+        setCredits(parsed);
+      }
+    }
+  }, []);
+
+  // Whenever credits changes, store it in cookie
+  useEffect(() => {
+    setCookie("credits", credits);
+  }, [credits]);
+
   // Loading and result states
   const [isLoading, setIsLoading] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
@@ -64,6 +105,15 @@ export default function ManipulatorAiLandingPage() {
 
   // 4) Send data to the server
   const handleGenerate = async () => {
+    // If no credits, block generation.
+    if (credits <= 0) {
+      alert("You have 0 credits remaining! Please purchase more credits to continue.");
+      return;
+    }
+
+    // Deduct 1 credit for generation or regeneration
+    setCredits((prev) => prev - 1);
+
     setGeneratedText("");
     setIsLoading(true);
 
@@ -106,6 +156,11 @@ export default function ManipulatorAiLandingPage() {
   // 6) JSX Output (full version with all sections!)
   return (
     <div className="min-h-screen w-full bg-black text-gray-100 font-sans relative">
+      {/* Display Credits Top Right */}
+      <div className="absolute top-4 right-4 bg-[#2c2c2c] text-white px-3 py-1 rounded-md shadow">
+        Credits: {credits}
+      </div>
+
       {/* Prompt Page Modal */}
       {showPromptPage && (
         <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4 overflow-y-auto">
